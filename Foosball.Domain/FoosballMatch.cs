@@ -5,8 +5,8 @@
         public Guid Id { get; private set; }
         public Team TeamA { get; private set; }
         public Team TeamB { get; private set; }
-        public int ScoreA { get; private set; }
-        public int ScoreB { get; private set; }
+        public List<Guid> ScoreA { get; private set; }
+        public List<Guid> ScoreB { get; private set; }
         public bool IsFinished { get; private set; }
 
         public FoosballMatch(Team teamA, Team teamB)
@@ -20,21 +20,21 @@
             Id = Guid.NewGuid();
             TeamA = teamA;
             TeamB = teamB;
-            ScoreA = 0;
-            ScoreB = 0;
+            ScoreA = [];
+            ScoreB = [];
             IsFinished = false;
         }
 
-        public void GoalForTeamA()
+        public void GoalForTeamA(Guid playerId)
         {
             if (IsFinished) throw new InvalidOperationException("Match is finished.");
-            ScoreA++;
+            ScoreA.Add(playerId);
         }
 
-        public void GoalForTeamB()
+        public void GoalForTeamB(Guid playerId)
         {
             if (IsFinished) throw new InvalidOperationException("Match is finished.");
-            ScoreB++;
+            ScoreB.Add(playerId);
         }
 
         public void FinishMatch()
