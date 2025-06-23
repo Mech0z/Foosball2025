@@ -11,14 +11,8 @@ namespace Domain
         public List<FoosballGoal> ScoreB { get; private set; }
         public bool IsFinished { get; private set; }
 
-        public FoosballMatch(Team teamA, Team teamB)
+        private FoosballMatch(Team teamA, Team teamB)
         {
-            if (teamA == null || teamB == null)
-                throw new ArgumentNullException("Teams cannot be null.");
-
-            if (!IsValidTeamSize(teamA, teamB))
-                throw new ArgumentException("Both teams must have the same number of players (1 or 2).");
-
             Id = Guid.NewGuid();
             TeamA = teamA;
             TeamB = teamB;
@@ -49,10 +43,21 @@ namespace Domain
             return true;
         }
 
-        private bool IsValidTeamSize(Team teamA, Team teamB)
+        private static bool IsValidTeamSize(Team teamA, Team teamB)
         {
             int size = teamA.PlayerCount;
             return (size == 1 || size == 2) && teamB.PlayerCount == size;
+        }
+
+        public static FoosballMatch Create(Team teamA, Team teamB)
+        {
+            if (teamA == null || teamB == null)
+                throw new ArgumentNullException("Teams cannot be null.");
+
+            if (!IsValidTeamSize(teamA, teamB))
+                throw new ArgumentException("Both teams must have the same number of players (1 or 2).");
+
+            return new FoosballMatch(teamA, teamB);
         }
     }
 }

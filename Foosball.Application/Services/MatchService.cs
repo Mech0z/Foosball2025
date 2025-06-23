@@ -27,7 +27,7 @@ namespace Foosball.Application.Services
             var teamOne = new Team(playerOneDefender, playerOneAttacker);
             var teamTwo = new Team(playerTwoDefender, playerTwoAttacker);
 
-            var match = new FoosballMatch(teamOne, teamTwo);
+            var match = FoosballMatch.Create(teamOne, teamTwo);
             if (match.IsValid())
             {
                 // Assuming there's a repository to save the match
