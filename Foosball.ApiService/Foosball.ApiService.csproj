@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Foosball.Application\Foosball.Application.csproj" />
     <ProjectReference Include="..\Foosball.ServiceDefaults\Foosball.ServiceDefaults.csproj" />
   </ItemGroup>
 

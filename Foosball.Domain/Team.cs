@@ -1,16 +1,31 @@
-﻿namespace Domain
+﻿
+namespace Foosball.Domain
 {
     public class Team
     {
-        public List<Player> Players { get; private set; }
+        public Player Defender { get; private set; }
+        public Player Attacker { get; private set; }
 
-        public Team(IEnumerable<Player> players)
+        public Team(Player singlePlayer)
         {
-            if (players == null) throw new ArgumentNullException(nameof(players));
-            var playerList = players.ToList();
-            if (playerList.Count != 1 && playerList.Count != 2)
-                throw new ArgumentException("A team must have 1 or 2 players.");
-            Players = playerList;
+            if (singlePlayer == null) throw new ArgumentNullException(nameof(singlePlayer));
+            
+            Defender = singlePlayer;
+            Attacker = singlePlayer; // In a single-player team, both roles are the same player
+        }
+
+        public Team(Player defender, Player attacker)
+        {
+            if (defender == null) throw new ArgumentNullException(nameof(defender));
+            if (attacker == null) throw new ArgumentNullException(nameof(attacker));
+            
+            Defender = defender;
+            Attacker = attacker;
+        }
+
+        public int PlayerCount
+        {
+            get => Defender == Attacker ? 1 : 2;
         }
     }
 }
