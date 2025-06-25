@@ -20,7 +20,14 @@ namespace Foosball.ApiService.Controllers
         {
             var matchId = matchService.StartMatch(request);
 
-            return Ok(new { matchId }); 
+            return Ok(new { matchId });
+        }
+
+        public IActionResult GoalScored([FromBody] GoalScoredRequest request)
+        {
+            // Assuming there's a method in matchService to handle goal scoring
+            // matchService.RecordGoal(request.MatchId, request.ScoringPlayerId);
+            return Ok(new { message = "Goal recorded successfully." });
         }
     }
 }

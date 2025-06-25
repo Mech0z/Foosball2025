@@ -59,5 +59,20 @@ namespace Domain
 
             return new FoosballMatch(teamA, teamB);
         }
+
+        public static FoosballMatch FromExisting(Guid id, Team teamA, Team teamB, List<FoosballGoal> scoreA, List<FoosballGoal> scoreB, bool isFinished = false)
+        {
+            if (id == Guid.Empty)
+                throw new ArgumentException("Id cannot be empty.", nameof(id));
+            if (teamA == null || teamB == null)
+                throw new ArgumentNullException("Teams cannot be null.");
+            var match = new FoosballMatch(teamA, teamB)
+            {
+                Id = id,
+                ScoreA = scoreA ?? [],
+                ScoreB = scoreB ?? []
+            };
+            return match;
+        }
     }
 }
