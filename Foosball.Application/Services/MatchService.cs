@@ -20,14 +20,15 @@ namespace Foosball.Application.Services
             this.goalRepository = goalRepository;
         }
 
-        public Guid StartMatch(StartMatchRequest startMatchRequest)
+        public async Task<Guid> StartMatch(StartMatchRequest startMatchRequest)
         {
-            var players = playerRepository.GetPlayers().Select(player => Player.FromExisting(player.Id, player.Name)).ToList();
+            var players = await playerRepository.GetPlayers();
+            var mappedPlayers = players.Select(player => Player.FromExisting(player.Id, player.Name)).ToList();
 
-            var playerOneDefender = players.GetById(startMatchRequest.TeamOneDefenderId);
-            var playerOneAttacker = players.GetById(startMatchRequest.TeamOneAttackerId);
-            var playerTwoDefender = players.GetById(startMatchRequest.TeamTwoDefenderId);
-            var playerTwoAttacker = players.GetById(startMatchRequest.TeamTwoAttackerId);
+            var playerOneDefender = mappedPlayers.GetById(startMatchRequest.TeamOneDefenderId);
+            var playerOneAttacker = mappedPlayers.GetById(startMatchRequest.TeamOneAttackerId);
+            var playerTwoDefender = mappedPlayers.GetById(startMatchRequest.TeamTwoDefenderId);
+            var playerTwoAttacker = mappedPlayers.GetById(startMatchRequest.TeamTwoAttackerId);
 
             var teamOne = new Team(playerOneDefender, playerOneAttacker);
             var teamTwo = new Team(playerTwoDefender, playerTwoAttacker);
@@ -36,7 +37,7 @@ namespace Foosball.Application.Services
             if (match.IsValid())
             {
                 var matchEntity = new MatchEntity { Id = match.Id };
-                matchRepository.SaveMatch(matchEntity);
+                await matchRepository.SaveMatch(matchEntity);
                 return match.Id;
             }
             else
@@ -45,9 +46,9 @@ namespace Foosball.Application.Services
             }
         }
 
-        public void RecordGoal(GoalScoredRequest goalScoredRequest)
+        public async Task RecordGoal(GoalScoredRequest goalScoredRequest)
         {
-            goalRepository.AddGoal(new GoalEntity
+            await goalRepository.AddGoal(new GoalEntity
             {
                 MatchId = goalScoredRequest.MatchId,
                 ScoringPlayerId = goalScoredRequest.ScoringPlayerId,

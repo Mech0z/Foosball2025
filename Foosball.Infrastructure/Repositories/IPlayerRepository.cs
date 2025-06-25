@@ -4,6 +4,6 @@ namespace Foosball.Infrastructure.Repositories
 {
     public interface IPlayerRepository
     {
-        List<PlayerEntity> GetPlayers();
+        Task<List<PlayerEntity>> GetPlayers();
     }
 }

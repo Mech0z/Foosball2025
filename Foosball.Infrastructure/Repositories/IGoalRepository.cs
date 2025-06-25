@@ -4,7 +4,7 @@ namespace Foosball.Infrastructure.Repositories
 {
     public interface IGoalRepository
     {
-        void AddGoal(GoalEntity goal);
-        List<GoalEntity> GetGoals(Guid matchId);
+        Task<Guid> AddGoal(GoalEntity goal);
+        Task<List<GoalEntity>> GetGoals(Guid matchId);
     }
 }

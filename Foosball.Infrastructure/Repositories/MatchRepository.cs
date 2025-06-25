@@ -1,30 +1,38 @@
 ﻿using Foosball.Infrastructure.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Foosball.Infrastructure.Repositories
 {
     public class MatchRepository : IMatchRepository
     {
-        public MatchRepository() { }
+        private readonly FoosballDbContext _dbContext;
 
-        public List<MatchEntity> GetMatches()
+        public MatchRepository(FoosballDbContext dbContext)
         {
-            // This method should return a list of matches.
-            // For now, we return an empty list as a placeholder.
-            return new List<MatchEntity>();
+            _dbContext = dbContext;
         }
 
-        public MatchEntity GetMatchById(Guid matchId)
+        public async Task<List<MatchEntity>> GetMatches()
         {
-            // This method should return a match by its ID.
-            // For now, we return null as a placeholder.
-            return null;
+            var matches = await _dbContext.Matches.AsNoTracking().ToListAsync();
+            return matches;
         }
 
-        public Guid SaveMatch(MatchEntity match)
+        public Task<MatchEntity> GetMatchById(Guid matchId)
         {
-            // This method should save the match to the database.
-            // For now, we do nothing as a placeholder.
-            return Guid.NewGuid();
+            var match = _dbContext.Matches.AsNoTracking().FirstOrDefaultAsync(m => m.Id == matchId);
+            if (match == null)
+            {
+                throw new KeyNotFoundException($"Match with ID {matchId} not found.");
+            }
+            return match;
+        }
+
+        public async Task<Guid> SaveMatch(MatchEntity match)
+        {           
+            _dbContext.Matches.Add(match);
+            var matchId = await _dbContext.SaveChangesAsync().ContinueWith(t => match.Id);
+            return matchId;
         }
     }
 }

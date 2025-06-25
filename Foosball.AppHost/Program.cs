@@ -1,6 +1,13 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var apiService = builder.AddProject<Projects.Foosball_ApiService>("apiservice");
+var sql = builder.AddSqlServer("sql")
+                 .WithLifetime(ContainerLifetime.Persistent);
+
+var db = sql.AddDatabase("database");
+
+var apiService = builder.AddProject<Projects.Foosball_ApiService>("apiservice")
+    .WithReference(db)
+    .WaitFor(db);
 
 builder.AddProject<Projects.Foosball_Web>("webfrontend")
     .WithExternalHttpEndpoints()

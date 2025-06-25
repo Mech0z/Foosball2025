@@ -4,6 +4,6 @@ namespace Foosball.Application.Services
 {
     public interface IMatchService
     {
-        Guid StartMatch(StartMatchRequest startMatchRequest);
+        Task<Guid> StartMatch(StartMatchRequest startMatchRequest);
     }
 }

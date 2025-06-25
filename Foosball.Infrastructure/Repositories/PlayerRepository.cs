@@ -1,16 +1,21 @@
 ﻿using Foosball.Infrastructure.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Foosball.Infrastructure.Repositories
 {
     public class PlayerRepository : IPlayerRepository
     {
-        public PlayerRepository() { }
+        private readonly FoosballDbContext _dbContext;
 
-        public List<PlayerEntity> GetPlayers()
+        public PlayerRepository(FoosballDbContext dbContext)
         {
-            // This method should return a list of players.
-            // For now, we return an empty list as a placeholder.
-            return new List<PlayerEntity>();
+            _dbContext = dbContext;
+        }
+
+        public async Task<List<PlayerEntity>> GetPlayers()
+        {
+            var players = await _dbContext.Players.AsNoTracking().ToListAsync();
+            return players;
         }
     }
 }

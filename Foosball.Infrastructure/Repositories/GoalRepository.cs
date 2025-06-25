@@ -1,22 +1,28 @@
 ﻿using Foosball.Infrastructure.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Foosball.Infrastructure.Repositories
 {
     public class GoalRepository : IGoalRepository
     {
-        public GoalRepository() { }
+        private readonly FoosballDbContext _dbContext;
 
-        public List<GoalEntity> GetGoals(Guid matchId)
+        public GoalRepository(FoosballDbContext dbContext)
         {
-            // This method should return a list of goals for the specified match.
-            // For now, we return an empty list as a placeholder.
-            return new List<GoalEntity>();
+            _dbContext = dbContext;
         }
 
-        public void AddGoal(GoalEntity goal)
+        public async Task<List<GoalEntity>> GetGoals(Guid matchId)
         {
-            // This method should add a goal to the repository.
-            // For now, we do nothing as a placeholder.
+            var goals = await _dbContext.Goals.AsNoTracking().ToListAsync();
+            return goals;
+        }
+
+        public async Task<Guid> AddGoal(GoalEntity goal)
+        {
+            await _dbContext.Goals.AddAsync(goal);
+            var goalId = await _dbContext.SaveChangesAsync().ContinueWith(t => goal.Id);
+            return goalId;
         }
     }
 }

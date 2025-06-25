@@ -4,8 +4,8 @@ namespace Foosball.Infrastructure.Repositories
 {
     public interface IMatchRepository
     {
-        MatchEntity GetMatchById(Guid matchId);
-        List<MatchEntity> GetMatches();
-        Guid SaveMatch(MatchEntity match);
+        Task<MatchEntity> GetMatchById(Guid matchId);
+        Task<List<MatchEntity>> GetMatches();
+        Task<Guid> SaveMatch(MatchEntity match);
     }
 }

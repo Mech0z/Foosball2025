@@ -1,4 +1,9 @@
+using Foosball.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddSqlServerClient(connectionName: "database");
+builder.AddSqlServerDbContext<FoosballDbContext>("sql");
 
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
