@@ -22,7 +22,8 @@ namespace Foosball.ApiService.Controllers
 
             return Ok(new { matchId });
         }
-
+        
+        [HttpPost]
         public IActionResult GoalScored([FromBody] GoalScoredRequest request)
         {
             // Assuming there's a method in matchService to handle goal scoring
