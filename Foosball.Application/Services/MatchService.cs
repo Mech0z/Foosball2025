@@ -57,5 +57,21 @@ namespace Foosball.Application.Services
                 ScoredAt = DateTimeOffset.UtcNow                
             });
         }
+
+        public async Task<GetMatchesResponse> GetMatches()
+        {
+            var matches = await matchRepository.GetMatches();
+            var players = await playerRepository.GetPlayers();
+            var mappedPlayers = players.Select(player => Player.FromExisting(player.Id, player.Name)).ToList();
+            var matchDtos = matches.Select(match => new MatchDto
+            (
+                match.Id,
+                new TeamDto(mappedPlayers.GetById(match.Team1DefenderId).Name, mappedPlayers.GetById(match.Team1AttackerId).Name),
+                new TeamDto(mappedPlayers.GetById(match.Team2DefenderId).Name, mappedPlayers.GetById(match.Team2AttackerId).Name),
+                match.Goals.Count,
+                match.Goals.Count
+            )).ToList();
+            return new GetMatchesResponse(matchDtos);
+        }
     }
 }

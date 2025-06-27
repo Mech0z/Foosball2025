@@ -30,5 +30,12 @@ namespace Foosball.ApiService.Controllers
             // matchService.RecordGoal(request.MatchId, request.ScoringPlayerId);
             return Ok(new { message = "Goal recorded successfully." });
         }
+
+        [HttpGet("get-matches")]
+        public IActionResult GetMatches()
+        {
+            var response = matchService.GetMatches();
+            return Ok(response);
+        }
     }
 }
