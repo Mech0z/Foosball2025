@@ -1,5 +1,9 @@
-﻿namespace Foosball.Infrastructure.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Foosball.Infrastructure.Entities
 {
+
+    [Table("Matches")]
     public class MatchEntity
     {
         public Guid Id { get; set; }

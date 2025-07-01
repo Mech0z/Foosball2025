@@ -16,9 +16,9 @@ namespace Foosball.ApiService.Controllers
         }
 
         [HttpPost("start-match")]
-        public IActionResult StartMatch([FromBody] StartMatchRequest request)
+        public async Task<IActionResult> StartMatchAsync([FromBody] StartMatchRequest request)
         {
-            var matchId = matchService.StartMatch(request);
+            var matchId = await matchService.StartMatch(request);
 
             return Ok(new { matchId });
         }
@@ -27,14 +27,15 @@ namespace Foosball.ApiService.Controllers
         public IActionResult GoalScored([FromBody] GoalScoredRequest request)
         {
             // Assuming there's a method in matchService to handle goal scoring
+
             // matchService.RecordGoal(request.MatchId, request.ScoringPlayerId);
             return Ok(new { message = "Goal recorded successfully." });
         }
 
         [HttpGet("get-matches")]
-        public IActionResult GetMatches()
+        public async Task<IActionResult> GetMatchesAsync()
         {
-            var response = matchService.GetMatches();
+            var response = await matchService.GetMatches();
             return Ok(response);
         }
     }

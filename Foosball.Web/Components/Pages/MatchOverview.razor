@@ -1,19 +1,52 @@
-﻿@page "/counter"
+﻿@page "/matchoverview"
+@using Foosball.Application.Dtos
 @rendermode InteractiveServer
 
-<PageTitle>Counter</PageTitle>
+@inject FoosballMatchApiClient FoosballMatchApiClient
 
-<h1>Counter</h1>
+<PageTitle>Matches</PageTitle>
 
-<p role="status">Current count: @currentCount</p>
+<h1>Matches</h1>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+@if (matches == null)
+{
+    <p>Loading...</p>
+}
+else if (matches.Count == 0)
+{
+    <p>No matches found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Match ID</th>
+                <th>Player 1</th>
+                <th>Player 2</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var match in matches)
+            {
+                <tr>
+                    <td>@match.MatchId</td>
+                    <td>@match.Team1.Defender - @match.Team1.Attacker</td>
+                    <td>@match.Team2.Defender - @match.Team2.Attacker</td>
+                    <td>@match.ScoreTeam1 - @match.ScoreTeam2</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
 @code {
-    private int currentCount = 0;
+    private List<MatchDto> matches;
 
-    private void IncrementCount()
+    protected override async Task OnInitializedAsync()
     {
-        currentCount++;
+        var response = await FoosballMatchApiClient.GetMatchesAsync();
+        matches = response.Matches;
     }
 }
