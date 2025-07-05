@@ -2,6 +2,7 @@ using Foosball.Application.Services;
 using Foosball.Infrastructure;
 using Foosball.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +38,27 @@ app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+
+    app.MapScalarApiReference(options =>
+    {
+        List<ScalarServer> servers = [];
+
+        string? httpsPort = Environment.GetEnvironmentVariable("ASPNETCORE_HTTPS_PORT");
+        if (httpsPort is not null)
+        {
+            servers.Add(new ScalarServer($"https://localhost:{httpsPort}"));
+        }
+
+        string? httpPort = Environment.GetEnvironmentVariable("ASPNETCORE_HTTP_PORT");
+        if (httpPort is not null)
+        {
+            servers.Add(new ScalarServer($"http://localhost:{httpPort}"));
+        }
+
+        options.Servers = servers;
+        options.Title = "Foosball API";
+        options.ShowSidebar = true;
+    });
 }
 
 app.MapDefaultEndpoints();
