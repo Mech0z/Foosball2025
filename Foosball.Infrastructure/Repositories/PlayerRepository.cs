@@ -12,6 +12,12 @@ namespace Foosball.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
+        public async Task AddPlayer(PlayerEntity player)
+        {
+            await _dbContext.Players.AddAsync(player);
+            await _dbContext.SaveChangesAsync();
+        }
+
         public async Task<List<PlayerEntity>> GetPlayers()
         {
             var players = await _dbContext.Players.AsNoTracking().ToListAsync();

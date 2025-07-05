@@ -20,6 +20,7 @@ builder.Services.AddScoped<IPlayerRepository, PlayerRepository>();
 builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 builder.Services.AddScoped<IGoalRepository, GoalRepository>();
 builder.Services.AddScoped<IMatchService, MatchService>();
+builder.Services.AddScoped<IPlayerService, PlayerService>();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
