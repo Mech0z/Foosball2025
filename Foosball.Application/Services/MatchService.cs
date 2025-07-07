@@ -36,7 +36,15 @@ namespace Foosball.Application.Services
             var match = FoosballMatch.Create(teamOne, teamTwo);
             if (match.IsValid())
             {
-                var matchEntity = new MatchEntity { Id = match.Id };
+                var matchEntity = new MatchEntity { 
+                    Id = match.Id, 
+                    Team1DefenderId = playerOneDefender.Id, 
+                    Team1AttackerId = playerOneAttacker.Id, 
+                    Team2DefenderId = playerTwoDefender.Id,
+                    Team2AttackerId = playerTwoAttacker.Id,
+                    CreatedAt = DateTimeOffset.UtcNow,
+                    FinishedAt = null,
+                };
                 await matchRepository.SaveMatch(matchEntity);
                 return match.Id;
             }
