@@ -24,11 +24,9 @@ namespace Foosball.ApiService.Controllers
         }
         
         [HttpPost]
-        public IActionResult GoalScored([FromBody] GoalScoredRequest request)
+        public async Task<IActionResult> GoalScoredAsync([FromBody] GoalScoredRequest request)
         {
-            // Assuming there's a method in matchService to handle goal scoring
-
-            // matchService.RecordGoal(request.MatchId, request.ScoringPlayerId);
+            await matchService.RecordGoal(request);
             return Ok(new { message = "Goal recorded successfully." });
         }
 
