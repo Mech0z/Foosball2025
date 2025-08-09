@@ -10,5 +10,6 @@ namespace Foosball.Infrastructure.Entities
         public Guid ScoringPlayerId { get; set; }
         public bool IsOwnGoal { get; set; }
         public DateTimeOffset ScoredAt { get; set; }
+        public MatchEntity Match { get; set; } = null!;
     }
 }

@@ -17,6 +17,17 @@ namespace Foosball.Infrastructure
         public DbSet<PlayerEntity> Players => Set<PlayerEntity>();
         public DbSet<MatchEntity> Matches => Set<MatchEntity>();
         public DbSet<GoalEntity> Goals => Set<GoalEntity>();
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<MatchEntity>()
+                .HasMany(m => m.Goals)
+                .WithOne(g => g.Match)
+                .HasForeignKey(g => g.MatchId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
     }
 
     public class FoosballDbContextFactory : IDesignTimeDbContextFactory<FoosballDbContext>

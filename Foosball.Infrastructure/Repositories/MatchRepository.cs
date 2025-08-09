@@ -14,7 +14,10 @@ namespace Foosball.Infrastructure.Repositories
 
         public async Task<List<MatchEntity>> GetMatches()
         {
-            var matches = await _dbContext.Matches.AsNoTracking().ToListAsync();
+            var matches = await _dbContext.Matches
+                .Include(m => m.Goals)
+                .AsNoTracking()
+                .ToListAsync();
 
             return matches;
         }

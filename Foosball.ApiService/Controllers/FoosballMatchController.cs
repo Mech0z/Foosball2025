@@ -23,8 +23,8 @@ namespace Foosball.ApiService.Controllers
             return Ok(new { matchId });
         }
         
-        [HttpPost]
-        public async Task<IActionResult> GoalScoredAsync([FromBody] GoalScoredRequest request)
+        [HttpPost("record-goal")]
+        public async Task<IActionResult> RecordGoalAsync([FromBody] GoalScoredRequest request)
         {
             await matchService.RecordGoal(request);
             return Ok(new { message = "Goal recorded successfully." });
