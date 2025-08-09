@@ -15,12 +15,13 @@ namespace Foosball.Infrastructure.Repositories
         public async Task<List<MatchEntity>> GetMatches()
         {
             var matches = await _dbContext.Matches.AsNoTracking().ToListAsync();
+
             return matches;
         }
 
-        public Task<MatchEntity> GetMatchById(Guid matchId)
+        public async Task<MatchEntity> GetMatchById(Guid matchId)
         {
-            var match = _dbContext.Matches.AsNoTracking().FirstOrDefaultAsync(m => m.Id == matchId);
+            var match = await _dbContext.Matches.AsNoTracking().FirstOrDefaultAsync(m => m.Id == matchId);
             if (match == null)
             {
                 throw new KeyNotFoundException($"Match with ID {matchId} not found.");
