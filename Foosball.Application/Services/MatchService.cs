@@ -66,18 +66,34 @@ namespace Foosball.Application.Services
             });
         }
 
+        private Team CreateTeam(List<Player> players, Guid defenderId, Guid attackerId)
+        {
+            var defender = players.FirstOrDefault(p => p.Id == defenderId);
+            var attacker = players.FirstOrDefault(p => p.Id == attackerId);
+            if (defender == null || attacker == null)
+            {
+                throw new ArgumentException("Invalid player IDs provided for team creation.");
+            }
+            return new Team(Player.FromExisting(defender.Id, defender.Name), Player.FromExisting(attacker.Id, attacker.Name));
+        }
+
         public async Task<GetMatchesResponse> GetMatches()
         {
             var matches = await matchRepository.GetMatches();
             var players = await playerRepository.GetPlayers();
             var mappedPlayers = players.Select(player => Player.FromExisting(player.Id, player.Name)).ToList();
-            var matchDtos = matches.Select(match => new MatchDto
+
+            var foosballMatches = matches.Select(match => FoosballMatch.FromExisting(match.Id, CreateTeam(mappedPlayers, match.Team1DefenderId, match.Team1AttackerId), 
+                                                                                  CreateTeam(mappedPlayers, match.Team2DefenderId, match.Team2AttackerId), 
+                                                                                  match.Goals.Select(goal => FoosballGoal.FromExisting(goal.Id, goal.ScoringPlayerId, goal.IsOwnGoal, goal.ScoredAt)).ToList(), 
+                                                                                  match.FinishedAt.HasValue)).ToList();
+            var matchDtos = foosballMatches.Select(match => new MatchDto
             (
                 match.Id,
-                new TeamDto(mappedPlayers.GetById(match.Team1DefenderId).Name, mappedPlayers.GetById(match.Team1AttackerId).Name),
-                new TeamDto(mappedPlayers.GetById(match.Team2DefenderId).Name, mappedPlayers.GetById(match.Team2AttackerId).Name),
-                match.Goals.Count,
-                match.Goals.Count
+                new TeamDto(match.TeamA.Defender.Name, match.TeamA.Attacker.Name),
+                new TeamDto(match.TeamB.Defender.Name, match.TeamB.Attacker.Name),
+                match.GetTeamAScore(),
+                match.GetTeamBScore()
             )).ToList();
             return new GetMatchesResponse(matchDtos);
         }
