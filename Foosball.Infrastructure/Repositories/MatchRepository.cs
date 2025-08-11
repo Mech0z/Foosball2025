@@ -24,11 +24,20 @@ namespace Foosball.Infrastructure.Repositories
 
         public async Task<MatchEntity> GetMatchById(Guid matchId)
         {
-            var match = await _dbContext.Matches.AsNoTracking().FirstOrDefaultAsync(m => m.Id == matchId);
+            var match = await _dbContext.Matches
+                .Include(m => m.Team1Defender)
+                .Include(m => m.Team1Attacker)
+                .Include(m => m.Team2Defender)
+                .Include(m => m.Team2Attacker)
+                .Include(m => m.Goals)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.Id == matchId);
+
             if (match == null)
             {
                 throw new KeyNotFoundException($"Match with ID {matchId} not found.");
             }
+
             return match;
         }
 

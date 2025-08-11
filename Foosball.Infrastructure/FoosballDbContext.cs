@@ -27,6 +27,31 @@ namespace Foosball.Infrastructure
                 .WithOne(g => g.Match)
                 .HasForeignKey(g => g.MatchId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Add these configurations for each player relationship
+            modelBuilder.Entity<MatchEntity>()
+                .HasOne(m => m.Team1Defender)
+                .WithMany()
+                .HasForeignKey(m => m.Team1DefenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MatchEntity>()
+                .HasOne(m => m.Team1Attacker)
+                .WithMany()
+                .HasForeignKey(m => m.Team1AttackerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MatchEntity>()
+                .HasOne(m => m.Team2Defender)
+                .WithMany()
+                .HasForeignKey(m => m.Team2DefenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MatchEntity>()
+                .HasOne(m => m.Team2Attacker)
+                .WithMany()
+                .HasForeignKey(m => m.Team2AttackerId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 

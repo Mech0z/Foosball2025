@@ -36,5 +36,12 @@ namespace Foosball.ApiService.Controllers
             var response = await matchService.GetMatches();
             return Ok(response);
         }
+
+        [HttpGet("get-match-by-id")]
+        public async Task<IActionResult> GetMatchByIdAsync([FromQuery] Guid matchId)
+        {
+            var response = await matchService.GetMatchById(matchId);
+            return Ok(response);
+        }
     }
 }

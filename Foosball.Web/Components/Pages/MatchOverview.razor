@@ -25,6 +25,7 @@ else
                 <th>Player 1</th>
                 <th>Player 2</th>
                 <th>Score</th>
+                <th>Details</th>
             </tr>
         </thead>
         <tbody>
@@ -35,6 +36,9 @@ else
                     <td>@match.Team1.Defender - @match.Team1.Attacker</td>
                     <td>@match.Team2.Defender - @match.Team2.Attacker</td>
                     <td>@match.ScoreTeam1 - @match.ScoreTeam2</td>
+                    <td>
+                        <a href="@($"/matchdetails/{match.MatchId}")">View</a>
+                    </td>
                 </tr>
             }
         </tbody>

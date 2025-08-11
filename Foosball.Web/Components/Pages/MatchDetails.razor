@@ -1,0 +1,72 @@
+﻿@page "/matchdetails/{matchId:guid}"
+@using Foosball.Application.Dtos
+@rendermode InteractiveServer
+
+@inject FoosballMatchApiClient FoosballMatchApiClient
+
+@code {
+    [Parameter]
+    public Guid matchId { get; set; }
+
+    private MatchDto? match;
+
+    protected override async Task OnInitializedAsync()
+    {
+        match = await FoosballMatchApiClient.GetMatchByIdAsync(matchId);
+    }
+}
+
+<PageTitle>Match Details</PageTitle>
+
+<h1>Match Details</h1>
+
+@if (match == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="mb-3">
+        <strong>Match ID:</strong> @match.MatchId<br />
+        <strong>Score:</strong> @match.ScoreTeam1 - @match.ScoreTeam2
+    </div>
+    <div class="mb-3">
+        <h4>Team A</h4>
+        <div>Defender: @match.Team1.Defender</div>
+        <div>Attacker: @match.Team1.Attacker</div>
+    </div>
+    <div class="mb-3">
+        <h4>Team B</h4>
+        <div>Defender: @match.Team2.Defender</div>
+        <div>Attacker: @match.Team2.Attacker</div>
+    </div>
+        <div>
+        <h4>Goals</h4>
+        @if (match.goals == null || match.goals.Count == 0)
+        {
+            <p>No goals recorded.</p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Own Goal</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var goal in match.goals.OrderBy(g => g.Timestamp))
+                    {
+                        <tr>
+                            <td>@goal.PlayerName</td>
+                            <td>@(goal.IsOwnGoal ? "Yes" : "No")</td>
+                            <td>@goal.Timestamp.ToString("g")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+}

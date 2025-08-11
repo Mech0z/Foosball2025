@@ -30,10 +30,11 @@ namespace Foosball.Application.Services
             var match = FoosballMatch.Create(teamOne, teamTwo);
             if (match.IsValid())
             {
-                var matchEntity = new MatchEntity { 
-                    Id = match.Id, 
-                    Team1DefenderId = match.TeamA.Defender.Id, 
-                    Team1AttackerId = match.TeamA.Attacker.Id, 
+                var matchEntity = new MatchEntity
+                {
+                    Id = match.Id,
+                    Team1DefenderId = match.TeamA.Defender.Id,
+                    Team1AttackerId = match.TeamA.Attacker.Id,
                     Team2DefenderId = match.TeamB.Defender.Id,
                     Team2AttackerId = match.TeamB.Attacker.Id,
                     CreatedAt = DateTimeOffset.UtcNow,
@@ -50,14 +51,28 @@ namespace Foosball.Application.Services
 
         public async Task RecordGoal(GoalScoredRequest goalScoredRequest)
         {
-            await goalRepository.AddGoal(new GoalEntity
+            var match = await matchRepository.GetMatchById(goalScoredRequest.MatchId);
+            if (match == null)
             {
-                MatchId = goalScoredRequest.MatchId,
-                ScoringPlayerId = goalScoredRequest.ScoringPlayerId,
-                IsOwnGoal = goalScoredRequest.IsOwnGoal,
-                Id = Guid.NewGuid(),
-                ScoredAt = DateTimeOffset.UtcNow
-            });
+                throw new KeyNotFoundException($"Match with ID {goalScoredRequest.MatchId} not found.");
+            }
+
+            var team1 = new Team(
+                Player.FromExisting(match.Team1Defender.Id, match.Team1Defender.Name),
+                Player.FromExisting(match.Team1Attacker.Id, match.Team1Attacker.Name)
+            );
+            var team2 = new Team(
+                Player.FromExisting(match.Team2Defender.Id, match.Team2Defender.Name),
+                Player.FromExisting(match.Team2Attacker.Id, match.Team2Attacker.Name)
+            );
+
+            var goals = match.Goals.Select(goal => FoosballGoal.FromExisting(goal.Id, goal.ScoringPlayerId, goal.IsOwnGoal, goal.Timestamp)).ToList();
+
+            var foosballMatch = FoosballMatch.FromExisting(match.Id, team1, team2, goals);
+            var goal = foosballMatch.RecordGoal(goalScoredRequest.ScoringPlayerId, goalScoredRequest.IsOwnGoal);
+
+            var goalEntity = GoalEntity.FromDomain(foosballMatch.Id, goal);
+            await goalRepository.AddGoal(goalEntity);
         }
 
         private Team CreateTeam(List<Player> players, Guid defenderId, Guid attackerId)
@@ -77,9 +92,9 @@ namespace Foosball.Application.Services
             var players = await playerRepository.GetPlayers();
             var mappedPlayers = players.Select(player => Player.FromExisting(player.Id, player.Name)).ToList();
 
-            var foosballMatches = matches.Select(match => FoosballMatch.FromExisting(match.Id, CreateTeam(mappedPlayers, match.Team1DefenderId, match.Team1AttackerId), 
-                                                                                  CreateTeam(mappedPlayers, match.Team2DefenderId, match.Team2AttackerId), 
-                                                                                  match.Goals.Select(goal => FoosballGoal.FromExisting(goal.Id, goal.ScoringPlayerId, goal.IsOwnGoal, goal.ScoredAt)).ToList(), 
+            var foosballMatches = matches.Select(match => FoosballMatch.FromExisting(match.Id, CreateTeam(mappedPlayers, match.Team1DefenderId, match.Team1AttackerId),
+                                                                                  CreateTeam(mappedPlayers, match.Team2DefenderId, match.Team2AttackerId),
+                                                                                  match.Goals.Select(goal => FoosballGoal.FromExisting(goal.Id, goal.ScoringPlayerId, goal.IsOwnGoal, goal.Timestamp)).ToList(),
                                                                                   match.FinishedAt.HasValue)).ToList();
             var matchDtos = foosballMatches.Select(match => new MatchDto
             (
@@ -87,9 +102,44 @@ namespace Foosball.Application.Services
                 new TeamDto(match.TeamA.Defender.Name, match.TeamA.Attacker.Name),
                 new TeamDto(match.TeamB.Defender.Name, match.TeamB.Attacker.Name),
                 match.GetTeamAScore(),
-                match.GetTeamBScore()
+                match.GetTeamBScore(),
+                match.Goals.Select(goal => new GoalDto
+                (
+                    players.Single(x => x.Id == goal.PlayerId).Name,
+                    goal.IsOwnGoal,
+                    goal.Timestamp
+                )).ToList()
             )).ToList();
             return new GetMatchesResponse(matchDtos);
+        }
+
+        public async Task<MatchDto> GetMatchById(Guid matchId)
+        {
+            var match = await matchRepository.GetMatchById(matchId);
+            if (match == null)
+            {
+                throw new KeyNotFoundException($"Match with ID {matchId} not found.");
+            }
+            var players = await playerRepository.GetPlayers();
+            var mappedPlayers = players.Select(player => Player.FromExisting(player.Id, player.Name)).ToList();
+            var foosballMatch = FoosballMatch.FromExisting(match.Id, CreateTeam(mappedPlayers, match.Team1DefenderId, match.Team1AttackerId),
+                                                            CreateTeam(mappedPlayers, match.Team2DefenderId, match.Team2AttackerId),
+                                                            match.Goals.Select(goal => FoosballGoal.FromExisting(goal.Id, goal.ScoringPlayerId, goal.IsOwnGoal, goal.Timestamp)).ToList(),
+                                                            match.FinishedAt.HasValue);
+            return new MatchDto
+            (
+                foosballMatch.Id,
+                new TeamDto(foosballMatch.TeamA.Defender.Name, foosballMatch.TeamA.Attacker.Name),
+                new TeamDto(foosballMatch.TeamB.Defender.Name, foosballMatch.TeamB.Attacker.Name),
+                foosballMatch.GetTeamAScore(),
+                foosballMatch.GetTeamBScore(),
+                match.Goals.Select(goal => new GoalDto
+                (
+                    players.Single(x => x.Id == goal.ScoringPlayerId).Name,
+                    goal.IsOwnGoal,
+                    goal.Timestamp
+                )).ToList()
+            );
         }
     }
 }

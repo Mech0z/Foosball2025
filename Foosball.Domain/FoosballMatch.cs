@@ -19,10 +19,12 @@ namespace Domain
             IsFinished = false;
         }
 
-        public void RecordGoal(FoosballGoal goal)
+        public FoosballGoal RecordGoal(Guid playerId, bool isOwnGoal)
         {
             if (IsFinished) throw new InvalidOperationException("Match is finished.");
+            var goal = FoosballGoal.Create(playerId, isOwnGoal);
             Goals.Add(goal);
+            return goal;
         }
 
         public void FinishMatch()
@@ -43,16 +45,18 @@ namespace Domain
 
         public int GetTeamAScore()
         {
-            var scoredGoals = Goals.Count(goal => goal.PlayerId == TeamA.Defender.Id || goal.PlayerId == TeamA.Attacker.Id);
-            var ownGoals = Goals.Count(goal => goal.IsOwnGoal && (goal.PlayerId == TeamB.Defender.Id || goal.PlayerId == TeamB.Attacker.Id));
-            return scoredGoals + ownGoals;
+            return Goals.Count(goal =>
+                (!goal.IsOwnGoal && (goal.PlayerId == TeamA.Defender.Id || goal.PlayerId == TeamA.Attacker.Id)) ||
+                (goal.IsOwnGoal && (goal.PlayerId == TeamB.Defender.Id || goal.PlayerId == TeamB.Attacker.Id))
+            );
         }
 
         public int GetTeamBScore()
         {
-            var scoredGoals = Goals.Count(goal => goal.PlayerId == TeamB.Defender.Id || goal.PlayerId == TeamB.Attacker.Id);
-            var ownGoals = Goals.Count(goal => goal.IsOwnGoal && (goal.PlayerId == TeamA.Defender.Id || goal.PlayerId == TeamA.Attacker.Id));
-            return scoredGoals + ownGoals;
+            return Goals.Count(goal =>
+                (!goal.IsOwnGoal && (goal.PlayerId == TeamB.Defender.Id || goal.PlayerId == TeamB.Attacker.Id)) ||
+                (goal.IsOwnGoal && (goal.PlayerId == TeamA.Defender.Id || goal.PlayerId == TeamA.Attacker.Id))
+            );
         }
 
         public static FoosballMatch Create(Team teamA, Team teamB)
@@ -72,9 +76,13 @@ namespace Domain
                 throw new ArgumentException("Id cannot be empty.", nameof(id));
             if (teamA == null || teamB == null)
                 throw new ArgumentNullException("Teams cannot be null.");
+
+
             var match = new FoosballMatch(teamA, teamB)
             {
                 Id = id,
+                TeamA = teamA,
+                TeamB = teamB,
                 Goals = goals ?? new List<FoosballGoal>(),
                 IsFinished = isFinished
             };

@@ -7,5 +7,6 @@ namespace Foosball.Application.Services
         Task<Guid> StartMatch(StartMatchRequest startMatchRequest);
         Task RecordGoal(GoalScoredRequest goalScoredRequest);
         Task<GetMatchesResponse> GetMatches();
+        Task<MatchDto> GetMatchById(Guid matchId);
     }
 }

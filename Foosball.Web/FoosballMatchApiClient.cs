@@ -32,6 +32,11 @@ public class FoosballMatchApiClient
         return await _httpClient.GetFromJsonAsync<GetMatchesResponse>("api/FoosballMatch/get-matches", cancellationToken);
     }
 
+    public async Task<MatchDto?> GetMatchByIdAsync(Guid matchId, CancellationToken cancellationToken = default)
+    {
+        return await _httpClient.GetFromJsonAsync<MatchDto>($"api/FoosballMatch/get-match-by-id?matchId={matchId}", cancellationToken);
+    }
+
     private class StartMatchResponse
     {
         public Guid MatchId { get; set; }
