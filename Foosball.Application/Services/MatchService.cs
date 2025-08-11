@@ -3,7 +3,6 @@ using Foosball.Application.Dtos;
 using Foosball.Domain;
 using Foosball.Infrastructure.Entities;
 using Foosball.Infrastructure.Repositories;
-using Foosball.Shared;
 
 namespace Foosball.Application.Services
 {
@@ -25,23 +24,18 @@ namespace Foosball.Application.Services
             var players = await playerRepository.GetPlayers();
             var mappedPlayers = players.Select(player => Player.FromExisting(player.Id, player.Name)).ToList();
 
-            var playerOneDefender = mappedPlayers.GetById(startMatchRequest.TeamOneDefenderId);
-            var playerOneAttacker = mappedPlayers.GetById(startMatchRequest.TeamOneAttackerId);
-            var playerTwoDefender = mappedPlayers.GetById(startMatchRequest.TeamTwoDefenderId);
-            var playerTwoAttacker = mappedPlayers.GetById(startMatchRequest.TeamTwoAttackerId);
-
-            var teamOne = new Team(playerOneDefender, playerOneAttacker);
-            var teamTwo = new Team(playerTwoDefender, playerTwoAttacker);
+            var teamOne = CreateTeam(mappedPlayers, startMatchRequest.TeamOneDefenderId, startMatchRequest.TeamOneAttackerId);
+            var teamTwo = CreateTeam(mappedPlayers, startMatchRequest.TeamTwoDefenderId, startMatchRequest.TeamTwoAttackerId);
 
             var match = FoosballMatch.Create(teamOne, teamTwo);
             if (match.IsValid())
             {
                 var matchEntity = new MatchEntity { 
                     Id = match.Id, 
-                    Team1DefenderId = playerOneDefender.Id, 
-                    Team1AttackerId = playerOneAttacker.Id, 
-                    Team2DefenderId = playerTwoDefender.Id,
-                    Team2AttackerId = playerTwoAttacker.Id,
+                    Team1DefenderId = match.TeamA.Defender.Id, 
+                    Team1AttackerId = match.TeamA.Attacker.Id, 
+                    Team2DefenderId = match.TeamB.Defender.Id,
+                    Team2AttackerId = match.TeamB.Attacker.Id,
                     CreatedAt = DateTimeOffset.UtcNow,
                     FinishedAt = null,
                 };
@@ -62,7 +56,7 @@ namespace Foosball.Application.Services
                 ScoringPlayerId = goalScoredRequest.ScoringPlayerId,
                 IsOwnGoal = goalScoredRequest.IsOwnGoal,
                 Id = Guid.NewGuid(),
-                ScoredAt = DateTimeOffset.UtcNow                
+                ScoredAt = DateTimeOffset.UtcNow
             });
         }
 
