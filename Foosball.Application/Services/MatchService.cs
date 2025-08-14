@@ -30,16 +30,7 @@ namespace Foosball.Application.Services
             var match = FoosballMatch.Create(teamOne, teamTwo);
             if (match.IsValid())
             {
-                var matchEntity = new MatchEntity
-                {
-                    Id = match.Id,
-                    Team1DefenderId = match.TeamA.Defender.Id,
-                    Team1AttackerId = match.TeamA.Attacker.Id,
-                    Team2DefenderId = match.TeamB.Defender.Id,
-                    Team2AttackerId = match.TeamB.Attacker.Id,
-                    CreatedAt = DateTimeOffset.UtcNow,
-                    FinishedAt = null,
-                };
+                var matchEntity = MatchEntity.FromDomain(match);
                 await matchRepository.SaveMatch(matchEntity);
                 return match.Id;
             }
@@ -92,13 +83,10 @@ namespace Foosball.Application.Services
             var players = await playerRepository.GetPlayers();
             var mappedPlayers = players.Select(player => Player.FromExisting(player.Id, player.Name)).ToList();
 
-            var foosballMatches = matches.Select(match => FoosballMatch.FromExisting(match.Id, CreateTeam(mappedPlayers, match.Team1DefenderId, match.Team1AttackerId),
-                                                                                  CreateTeam(mappedPlayers, match.Team2DefenderId, match.Team2AttackerId),
-                                                                                  match.Goals.Select(goal => FoosballGoal.FromExisting(goal.Id, goal.ScoringPlayerId, goal.IsOwnGoal, goal.Timestamp)).ToList(),
-                                                                                  match.FinishedAt.HasValue)).ToList();
-            var matchDtos = foosballMatches
-                .Select(match => MatchDto.FromDomain(match, mappedPlayers))
+            var matchDtos = matches
+                .Select(match => MatchDto.FromDomain(match.ToDomain(mappedPlayers), mappedPlayers))
                 .ToList();
+
             return new GetMatchesResponse(matchDtos);
         }
 
@@ -111,14 +99,8 @@ namespace Foosball.Application.Services
             }
             var players = await playerRepository.GetPlayers();
             var mappedPlayers = players.Select(player => Player.FromExisting(player.Id, player.Name)).ToList();
-            var foosballMatch = FoosballMatch.FromExisting(
-                match.Id,
-                CreateTeam(mappedPlayers, match.Team1DefenderId, match.Team1AttackerId),
-                CreateTeam(mappedPlayers, match.Team2DefenderId, match.Team2AttackerId),
-                match.Goals.Select(goal => FoosballGoal.FromExisting(goal.Id, goal.ScoringPlayerId, goal.IsOwnGoal, goal.Timestamp)).ToList(),
-                match.FinishedAt.HasValue
-            );
-            return MatchDto.FromDomain(foosballMatch, mappedPlayers);
+
+            return MatchDto.FromDomain(match.ToDomain(mappedPlayers), mappedPlayers);
         }
     }
 }
