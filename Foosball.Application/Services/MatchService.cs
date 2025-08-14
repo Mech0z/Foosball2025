@@ -96,20 +96,9 @@ namespace Foosball.Application.Services
                                                                                   CreateTeam(mappedPlayers, match.Team2DefenderId, match.Team2AttackerId),
                                                                                   match.Goals.Select(goal => FoosballGoal.FromExisting(goal.Id, goal.ScoringPlayerId, goal.IsOwnGoal, goal.Timestamp)).ToList(),
                                                                                   match.FinishedAt.HasValue)).ToList();
-            var matchDtos = foosballMatches.Select(match => new MatchDto
-            (
-                match.Id,
-                new TeamDto(match.TeamA.Defender.Name, match.TeamA.Attacker.Name),
-                new TeamDto(match.TeamB.Defender.Name, match.TeamB.Attacker.Name),
-                match.GetTeamAScore(),
-                match.GetTeamBScore(),
-                match.Goals.Select(goal => new GoalDto
-                (
-                    players.Single(x => x.Id == goal.PlayerId).Name,
-                    goal.IsOwnGoal,
-                    goal.Timestamp
-                )).ToList()
-            )).ToList();
+            var matchDtos = foosballMatches
+                .Select(match => MatchDto.FromDomain(match, mappedPlayers))
+                .ToList();
             return new GetMatchesResponse(matchDtos);
         }
 
@@ -122,24 +111,14 @@ namespace Foosball.Application.Services
             }
             var players = await playerRepository.GetPlayers();
             var mappedPlayers = players.Select(player => Player.FromExisting(player.Id, player.Name)).ToList();
-            var foosballMatch = FoosballMatch.FromExisting(match.Id, CreateTeam(mappedPlayers, match.Team1DefenderId, match.Team1AttackerId),
-                                                            CreateTeam(mappedPlayers, match.Team2DefenderId, match.Team2AttackerId),
-                                                            match.Goals.Select(goal => FoosballGoal.FromExisting(goal.Id, goal.ScoringPlayerId, goal.IsOwnGoal, goal.Timestamp)).ToList(),
-                                                            match.FinishedAt.HasValue);
-            return new MatchDto
-            (
-                foosballMatch.Id,
-                new TeamDto(foosballMatch.TeamA.Defender.Name, foosballMatch.TeamA.Attacker.Name),
-                new TeamDto(foosballMatch.TeamB.Defender.Name, foosballMatch.TeamB.Attacker.Name),
-                foosballMatch.GetTeamAScore(),
-                foosballMatch.GetTeamBScore(),
-                match.Goals.Select(goal => new GoalDto
-                (
-                    players.Single(x => x.Id == goal.ScoringPlayerId).Name,
-                    goal.IsOwnGoal,
-                    goal.Timestamp
-                )).ToList()
+            var foosballMatch = FoosballMatch.FromExisting(
+                match.Id,
+                CreateTeam(mappedPlayers, match.Team1DefenderId, match.Team1AttackerId),
+                CreateTeam(mappedPlayers, match.Team2DefenderId, match.Team2AttackerId),
+                match.Goals.Select(goal => FoosballGoal.FromExisting(goal.Id, goal.ScoringPlayerId, goal.IsOwnGoal, goal.Timestamp)).ToList(),
+                match.FinishedAt.HasValue
             );
+            return MatchDto.FromDomain(foosballMatch, mappedPlayers);
         }
     }
 }
