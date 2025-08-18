@@ -1,0 +1,121 @@
+﻿@page "/match-recorder/{matchId:guid}"
+@using Foosball.Application.Dtos
+@rendermode InteractiveServer
+
+@inject FoosballMatchApiClient FoosballMatchApiClient
+
+@code {
+    [Parameter]
+    public Guid matchId { get; set; }
+
+    private MatchDto? match;
+    private GoalFormModel goalForm = new();
+    private string? message;
+    private bool isSubmitting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        match = await FoosballMatchApiClient.GetMatchByIdAsync(matchId);
+    }
+
+    private async Task SubmitGoalAsync()
+    {
+        isSubmitting = true;
+        message = null;
+        try
+        {
+            var request = new GoalScoredRequest(matchId, goalForm.SelectedPlayerId)
+            {
+                IsOwnGoal = goalForm.IsOwnGoal
+            };
+            var result = await FoosballMatchApiClient.GoalScoredAsync(request);
+                if (result)
+            {
+                message = "Goal recorded successfully.";
+                // Optionally refresh match details to show updated goals
+                match = await FoosballMatchApiClient.GetMatchByIdAsync(matchId);
+            }
+            else
+            {
+                message = "Failed to record goal.";
+            }
+        }
+        catch (Exception ex)
+        {
+            message = $"Error: {ex.Message}";
+        }
+        isSubmitting = false;
+    }
+
+    public class GoalFormModel
+    {
+        public Guid SelectedPlayerId { get; set; }
+        public bool IsOwnGoal { get; set; }
+    }
+}
+
+<PageTitle>Record Goal</PageTitle>
+
+<h1>Record Goal</h1>
+
+<a class="btn btn-secondary mb-3" href="@($"/matchdetails/{matchId}")">Back to Match Details</a>
+
+@if (match == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <EditForm Model="goalForm" OnValidSubmit="SubmitGoalAsync">
+        <div class="mb-3">
+            <label for="playerSelect" class="form-label">Player</label>
+            <select id="playerSelect" class="form-select" @bind="goalForm.SelectedPlayerId" required>
+                <option value="">-- Select Player --</option>
+                <option value="@match.Team1.Defender.Id">@match.Team1.Defender.Name</option>
+                <option value="@match.Team1.Attacker.Id">@match.Team1.Attacker.Name</option>
+                <option value="@match.Team2.Defender.Id">@match.Team2.Defender.Name</option>
+                <option value="@match.Team2.Attacker.Id">@match.Team2.Attacker.Name</option>
+            </select>
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="ownGoalCheck" @bind="goalForm.IsOwnGoal" />
+            <label class="form-check-label" for="ownGoalCheck">Own Goal</label>
+        </div>
+        <button type="submit" class="btn btn-primary" disabled="@isSubmitting">Record Goal</button>
+    </EditForm>
+
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="mt-3 alert @(message.Contains("success") ? "alert-success" : "alert-danger")">@message</div>
+    }
+
+    <div class="mt-4">
+        <h4>Goals</h4>
+        @if (match.goals == null || match.goals.Count == 0)
+        {
+            <p>No goals recorded.</p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Own Goal</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var goal in match.goals.OrderBy(g => g.Timestamp))
+                    {
+                        <tr>
+                            <td>@goal.PlayerName</td>
+                            <td>@(goal.IsOwnGoal ? "Yes" : "No")</td>
+                            <td>@goal.Timestamp.ToString("g")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+}

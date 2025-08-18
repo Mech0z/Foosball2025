@@ -23,7 +23,7 @@ public class FoosballMatchApiClient
 
     public async Task<bool> GoalScoredAsync(GoalScoredRequest request, CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.PostAsJsonAsync("api/FoosballMatch", request, cancellationToken);
+        var response = await _httpClient.PostAsJsonAsync("api/FoosballMatch/record-goal", request, cancellationToken);
         return response.IsSuccessStatusCode;
     }
 

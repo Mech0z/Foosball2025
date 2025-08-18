@@ -20,6 +20,9 @@
 
 <h1>Match Details</h1>
 
+
+<a class="btn btn-primary mb-3" href="@($"/match-recorder/{matchId}")">Register Goals</a>
+
 @if (match == null)
 {
     <p>Loading...</p>
@@ -32,13 +35,13 @@ else
     </div>
     <div class="mb-3">
         <h4>Team A</h4>
-        <div>Defender: @match.Team1.Defender</div>
-        <div>Attacker: @match.Team1.Attacker</div>
+        <div>Defender: @match.Team1.Defender.Name</div>
+        <div>Attacker: @match.Team1.Attacker.Name</div>
     </div>
     <div class="mb-3">
         <h4>Team B</h4>
-        <div>Defender: @match.Team2.Defender</div>
-        <div>Attacker: @match.Team2.Attacker</div>
+        <div>Defender: @match.Team2.Defender.Name</div>
+        <div>Attacker: @match.Team2.Attacker.Name</div>
     </div>
         <div>
         <h4>Goals</h4>

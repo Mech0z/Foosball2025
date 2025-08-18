@@ -1,9 +1,9 @@
 ﻿namespace Foosball.Application.Dtos
 {
-    public record TeamDto(string Defender, string Attacker)
+    public record TeamDto(PlayerDto Defender, PlayerDto Attacker)
     {
-        public TeamDto() : this(string.Empty, string.Empty) { }
-        public TeamDto(string playerName)
-            : this(playerName, playerName) { }
+        public TeamDto() : this(new PlayerDto { Name = string.Empty }, new PlayerDto { Name = string.Empty }) { }
+        public TeamDto(PlayerDto player)
+            : this(player, player) { }
     }
 }

@@ -7,10 +7,18 @@ namespace Foosball.Application.Dtos
     {
         public static MatchDto FromDomain(FoosballMatch match, List<Player> players)
         {
+            PlayerDto MapPlayer(Player p) => new PlayerDto { Id = p.Id, Name = p.Name };
+
             return new MatchDto(
                 match.Id,
-                new TeamDto(match.TeamA.Defender.Name, match.TeamA.Attacker.Name),
-                new TeamDto(match.TeamB.Defender.Name, match.TeamB.Attacker.Name),
+                new TeamDto(
+                    MapPlayer(match.TeamA.Defender),
+                    MapPlayer(match.TeamA.Attacker)
+                ),
+                new TeamDto(
+                    MapPlayer(match.TeamB.Defender),
+                    MapPlayer(match.TeamB.Attacker)
+                ),
                 match.GetTeamAScore(),
                 match.GetTeamBScore(),
                 match.Goals.Select(goal => new GoalDto(
